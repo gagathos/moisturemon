@@ -1,0 +1,11 @@
+{
+  "name": "moisturemon",
+  "version": "1.0.0",
+  "description": "Monitor moisture via arduino uno",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "George Agathos",
+  "license": "ISC"
+}
