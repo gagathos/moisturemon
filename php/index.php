@@ -1,3 +1,4 @@
+<?php $config = yaml_parse_file('../config.yml'); ?>
 <html><head>
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"
@@ -5,15 +6,15 @@
 	  crossorigin="anonymous"></script>
 <script type="text/javascript">
 var dbg
+var myChart
 $(document).ready(function () {
 	$.getJSON('data.json', (data) => {
-		console.log(data);
 		let plotData = [];
 		$.each(data, (inx, item) => {
 			plotData.push([item.ts, parseFloat(item.moisture)])
 		})
 		console.log(plotData)
-        var myChart = Highcharts.chart('container', {
+        myChart = Highcharts.chart('container', {
             chart: {
                 type: 'line'
             },
@@ -24,7 +25,7 @@ $(document).ready(function () {
                 title: { text: 'Date/Time' },
         	    labels:{
         	     formatter: function(){
-        	         return Highcharts.dateFormat('%Y %M %d',this.value);
+        	         return Highcharts.dateFormat('%m/%d %I:%M%p',this.value);
         	     }
         	  }
             },
@@ -36,6 +37,17 @@ $(document).ready(function () {
             series: [{data: plotData}]
         });
 	});
+	setInterval(() => {
+		$.getJSON('data.json', (data) => {
+			let plotData = [];
+			$.each(data, (inx, item) => {
+				plotData.push([item.ts, parseFloat(item.moisture)])
+			})
+	        myChart.update({
+	            series: [{data: plotData}]
+	        });
+		});
+	}, <?php print $config['polling_interval'] * 1000; ?>)
 });
 </script>
 
