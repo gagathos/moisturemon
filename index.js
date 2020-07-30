@@ -42,19 +42,7 @@ function open () {
 }
 port.on('error', (err) => console.error('Error: ', err.message));
 port.on('open', function() {
-    function send() {
-        if (!port.isOpen()) // v5.x require
-            return console.log('Port closed. Data is not sent.');
-
-        port.write(123, function (err) {
-            if (err)
-                console.log('Error on write: ' +  err.message)
-
-            port.drain(() => console.log('DONE'));
-        });
-    }
-
-    setInterval(send, 1000);
+    requestReading();
 });
 
 port.on('close', function () {
