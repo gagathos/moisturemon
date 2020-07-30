@@ -27,8 +27,42 @@ try {
     console.log(e);
 }
 
-const port = new SerialPort(config.port, { baudRate: 9600})
+const port = new SerialPort(config.port, { baudRate: 9600, autoOpen: false})
 const parser = port.pipe(new Readline({ delimiter: '\n'}))
+
+
+function open () {
+    port.open(function (err) {
+        if (!err)
+           return;
+
+        console.log('Port is not open: ' + err.message);
+        setTimeout(open, 10000); // next attempt to open after 10s
+    });
+}
+port.on('error', (err) => console.error('Error: ', err.message));
+port.on('open', function() {
+    function send() {
+        if (!port.isOpen()) // v5.x require
+            return console.log('Port closed. Data is not sent.');
+
+        port.write(123, function (err) {
+            if (err)
+                console.log('Error on write: ' +  err.message)
+
+            port.drain(() => console.log('DONE'));
+        });
+    }
+
+    setInterval(send, 1000);
+});
+
+port.on('close', function () {
+    console.log('CLOSE');
+    open(); // reopen 
+});
+
+
 
 var requestReading = (() => {
 	 port.write('g'); //just send one character to get a response from the sensor
@@ -45,9 +79,11 @@ parser.on('data', data =>{
       qs: {payload:  JSON.stringify(payload).toString('base64')},
     }, (err, result) => {
     	console.log(result.body)
+      if(result.body) {
       let response = JSON.parse(result.body)
-      if(response.ok == 'ok') {
-    	  stored_readings = []; //clear stored readings queue
+      	 if(response && response.ok == 'ok') {
+    	    stored_readings = []; //clear stored readings queue
+     	 }
       }
       if(err ){//|| !response.ok) {
     	//failure
@@ -56,4 +92,5 @@ parser.on('data', data =>{
   })
 });
 
+open();
 setInterval(requestReading, config.polling_interval * 1000)
