@@ -27,7 +27,7 @@ try {
     console.log(e);
 }
 
-const port = new SerialPort(config.port, { baudRate: 9600, autoOpen: false})
+var port = new SerialPort(config.port, { baudRate: 9600, autoOpen: false})
 const parser = port.pipe(new Readline({ delimiter: '\n'}))
 
 
@@ -53,8 +53,13 @@ port.on('close', function () {
 
 
 var requestReading = (() => {
+	if(port.isOpen) {
 	 port.write('g'); //just send one character to get a response from the sensor
 	 console.log('Requesting readout');
+	} else {
+		console.log('Port not open, attempting to reopen')
+		open();
+	}
 })
 
 parser.on('data', data =>{
