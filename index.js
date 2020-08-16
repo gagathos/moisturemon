@@ -71,12 +71,16 @@ parser.on('data', data =>{
       url: config.send_url,
       qs: {payload:  JSON.stringify(payload).toString('base64')},
     }, (err, result) => {
-    	console.log(result.body)
-      if(result.body) {
-      let response = JSON.parse(result.body)
+    
+      if(result && result.body) {
+      try {
+	 let response = JSON.parse(result.body)
       	 if(response && response.ok == 'ok') {
     	    stored_readings = []; //clear stored readings queue
      	 }
+      	} catch (e) {
+		err = true;
+      	}
       }
       if(err ){//|| !response.ok) {
     	//failure
